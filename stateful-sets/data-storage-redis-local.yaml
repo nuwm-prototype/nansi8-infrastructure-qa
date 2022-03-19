@@ -1,0 +1,110 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: redis-volume-0
+  labels:
+    type: local
+spec:
+  storageClassName: local
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/minikube/0"
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: redis-volume-1
+  labels:
+    type: local
+spec:
+  storageClassName: local
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/minikube/1"
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: redis-volume-2
+  labels:
+    type: local
+spec:
+  storageClassName: local
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/minikube/2"
+
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: redis-volume-3
+  labels:
+    type: local
+spec:
+  storageClassName: local
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: "/data/minikube/3"
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: data-storage
+spec:
+  serviceName: data-storage-service
+  selector:
+    matchLabels:
+      app: data-storage
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: data-storage
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: redis-data-storage
+        image: redis
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 6379
+          name: redis
+        volumeMounts:
+        - mountPath: /data
+          name: data-storage-volume
+        resources:
+          requests:
+            cpu: 0.1
+            memory: 128Mi
+          limits:
+            cpu: 0.1
+            memory: 256Mi
+  volumeClaimTemplates:
+  - metadata:
+      name: data-storage-volume
+    spec:
+      accessModes: [ "ReadWriteMany" ]
+      storageClassName: local
+      resources:
+        requests:
+          storage: 1Gi
